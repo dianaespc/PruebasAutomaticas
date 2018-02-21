@@ -98,6 +98,7 @@
         }
 
         card.querySelector('.card-last-updated').textContent = data.created;
+
         var scheduleUIs = card.querySelectorAll('.schedule');
         for(var i = 0; i<4; i++) {
             var schedule = schedules[i];
@@ -108,10 +109,17 @@
         }
 
         if (app.isLoading) {
+                    window.cardLoadTime = performance.now();
+                    app.spinner.setAttribute('hidden', true);
+                    app.container.removeAttribute('hidden');
+                    app.isLoading = false;
+            }
+        /*if (app.isLoading) {
             app.spinner.setAttribute('hidden', true);
             app.container.removeAttribute('hidden');
             app.isLoading = false;
-        }
+        }*/
+
     };
 
     /*****************************************************************************
@@ -131,16 +139,15 @@
             * data. If the service worker has the data, then display the cached
             * data while the app fetches the latest data.
             */
-			console.log('*******Encuentra CACHE');
-            caches.match(url).then(function(response) {
+           caches.match(url).then(function(response) {
              if (response) {
                response.json().then(function updateFromCache(json) {
-                 console.log('*******Entra LEE CACHE',json);
-				 //var results = json.query.results;
-                 var results = json.result;
+                 console.log('*******Entra LEE CACHE RESULTADOS',json);
+                 var results = json.query.results;
+                 console.log('*******Entra LEE CACHE RESULTADOS', results);
                  results.key = key;
                  results.label = label;
-                 //results.created = json.query.created;
+                 results.created = json.query.created;
                  app.updateTimetableCard(results);
                });
              }
@@ -149,11 +156,18 @@
 
         var request = new XMLHttpRequest();
         request.onreadystatechange = function () {
+          var tiempoInicial = performance.now();
+            console.log('********************* tiempo inicial '+ tiempoInicial);
             if (request.readyState === XMLHttpRequest.DONE) {
-                if (request.status === 200) {
 
+                if (request.status === 200) {
+                  var tiempoFinal = performance.now();
+                  console.log('********************* tiempo final '+ tiempoFinal);
+                  var resta = tiempoFinal-tiempoInicial;
+                  window.tiempoRespuestaAPI = resta;
+                  console.log('*******Tiemp respuesta '+ resta);
                     var response = JSON.parse(request.response);
-                    console.log('*******REQUEST POR WEB', response);
+
                     var result = {};
                     result.key = key;
                     result.label = label;
@@ -195,12 +209,6 @@
             },
             {
                 message: '2 mn'
-            },
-            {
-                message: '4 mn'
-            },
-            {
-                message: '6 mn'
             }
         ]
 
@@ -244,7 +252,7 @@
         * that data into the page.
 		*/
         app.getSchedule('metros/1/Nation/A', 'Nation, Direction La Défense');
-		    console.log('entra por else '+app.initialStationTimetable);
+		    //console.log("Call to doSomething took " + (window.tiempoFinal - window.tiempoInicial) + " milliseconds.");
         app.selectedTimetables = [
             {key: initialStationTimetable.key, label: initialStationTimetable.label}
         ];

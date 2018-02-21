@@ -1,0 +1,59 @@
+'use strict';
+
+const Audit = require('lighthouse').Audit;
+
+const MAX_CARD_TIME = 2000;
+
+class LoadAudit extends Audit {
+    static get meta() {
+        return {
+            category: 'MyPerformance',
+            name: 'card-audit',
+            description: 'Schedule card initialized and ready',
+            failureDescription: 'Schedule Card slow to initialize',
+            helpText: 'Used to measure time from navigationStart to when the schedule' +
+            ' card is shown.',
+
+            requiredArtifacts: ['TimeToCard']
+        };
+    }
+
+    static audit(artifacts) {
+        const loadedTime = artifacts.TimeToCard;
+
+        const belowThreshold = loadedTime <= MAX_CARD_TIME;
+
+        return {
+            rawValue: loadedTime,
+            score: belowThreshold
+        };
+    }
+}
+
+class APIAudit extends Audit {
+    static get meta() {
+        return {
+            category: 'MyPerformance',
+            name: 'card-audit',
+            description: 'Prueba tiempo api inicial',
+            failureDescription: 'Se demoro mucho',
+            helpText: 'Bla bla bla' +
+            ' algo is shown.',
+
+            requiredArtifacts: ['TimeFistCall']
+        };
+    }
+
+    static audit(artifacts) {
+        const loadedTime = artifacts.TimeFistCall;
+
+        const belowThreshold = loadedTime <= MAX_CARD_TIME;
+
+        return {
+            rawValue: loadedTime,
+            score: belowThreshold
+        };
+    }
+}
+
+module.exports = LoadAudit, APIAudit;
